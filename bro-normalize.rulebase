@@ -1,4 +1,4 @@
-# Sagan bro-normalize.rulebase
+# Sagan openssh-normalize.rulebase
 # Copyright (c) 2009-2015, Quadrant Information Security <www.quadrantsec.com>
 # All rights reserved.
 #
@@ -26,9 +26,36 @@
 #  USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 #*************************************************************
+#rdp.log
+#cookie                   result                   security_protocol        keyboard_layout          client_build             client_name              client_dig_product_id    desktop_width            desktop_height           requested_color_depth    cert_type                cert_count               cert_permanent           encryption_level         encryption_method        
+#string                   string                   string                   string                   string                   string                   string                   count                    count                    string                   string                   count                    bool                     string                   string  
+
+# ts      uid     id.orig_h       id.orig_p       id.resp_h       id.resp_p
+prefix=%ts:kernel-timestamp%%-:whitespace%%uid:word%%-:whitespace%%id.orig_h:ipv4%%-:whitespace%%id.orig_p:number%%-:whitespace%%id.resp_h:ipv4%%-:whitespace%%id.resp_p:number%%-:whitespace%
+
+# conn.log
+rule=%proto:word%%-:whitespace%%service:word%%-:whitespace%%duration:%%-:whitespace%%orig_bytes:number%%-:whitespace%%resp_bytes:number%%-:whitespace%%conn_stat:word%%-:whitespace%%local_orig:regex:/\b[T|F]\b/%%-:whitespace%%local_resp:alpha%%-:whitespace%%missed_bytes:number%%-:whitespace%%history:alpha%%-:whitespace%%orig_pkts:number%%-:whitespace%%orig_ip_bytes:number%%-:whitespace%%resp_pkts:number%%-:whitespace%%resp_ip_bytes:number%%-:whitespace%%tunnel_parents:word%%-:whitespace%%orig_cc:word%%-:whitespace%%resp_cc:word%%-:whitespace%%peer:word%
+# conn.log without peer and geoip fields
+rule=%proto:word%%-:whitespace%%service:word%%-:whitespace%%duration:%%-:whitespace%%orig_bytes:number%%-:whitespace%%resp_bytes:number%%-:whitespace%%conn_stat:word%%-:whitespace%%local_orig:regex:/\b[T|F]\b/%%-:whitespace%%local_resp:alpha%%-:whitespace%%missed_bytes:number%%-:whitespace%%history:alpha%%-:whitespace%%orig_pkts:number%%-:whitespace%%orig_ip_bytes:number%%-:whitespace%%resp_pkts:number%%-:whitespace%%resp_ip_bytes:number%%-:whitespace%%-:rest%
+
+# dpd.log
+rule=%proto:regex:/\b[udp|tcp|icmp]\b/%%-:whitespace%%analyzer:\b[A-Z]+\b%%-:whitespace%%-:rest%
+# dhcp.log
+rule=%mac:mac48%%-:whitespace%%assigned_ip:ipv4%%-:whitespace%%lease_time:kernel-timestamp%%-:whitespace%%trans_id:number%
+# dns.log
+rule=%proto:regex:/\b[udp|tcp]\b/%%-:whitespace%%trans_id:number%%-:whitespace%%query:word%-:whitespace%%qclass:number%%-:whitespace%%qclass_name:word%%-:whitespace%%qtype:number%%-:whitespace%%qtype_name:word%%-:whitespace%%rcode:number%%-:whitespace%%rcode_name:word%%-:whitespace%%AA:regex:/\b[T|F]\b/%-:whitespace%%TC:regex:\b[T|F]\b/%%-:whitespace%%RD:regex:/\b[T|F]\b/%%-:whitespace%%RA:regex:/\b[T|F]\b/%%-:whitespace%%Z:number%%-:whitespace%%answers:word%%-:whitespace%%TTLs:word%%-:whitespace%%rejected:regex:/\b[T|F]\b/%%-:whitespace%%cc:word%
+# ftp.log
+rule=%user:word%%-:whitespace%%password:word%%-:whitespace%%command:alpha%%-:whitespace%%arg:word%%-:whitespace%%mime_type:word%%-:whitespace%%file_size:number%%-:whitespace%%reply_code:number%%-:whitespace%%reply_msg:word%%-:whitespace%%data_channel.passive:regex:/\b[T|F]\b/%%-:whitespace%%data_channel.orig_h:ipv4%%-:whitespace%%data_channel.resp_h:ipv4%%-:whitespace%%data_channel.resp_p:number%%-:whitespace%%fuid:word%
+# ssh.log
+rule=%version:number%%-:whitespace%%auth_success:regex:/\b[T|F|-]\b/%%-:whitespace%%direction:regex:/INBOUND|OUTBOUND/%%-:whitespace%%client:word%%-:whitespace%%server:word%%-:whitespace%%cipher_alg:word%%-:whitespace%%mac_alg:word%%-:whitespace%%compression_alg:word%%-:whitespace%%hex_alg:word%%-:whitespace%%host_key_alg:word%%-:whitespace%%host_key:word%%-:whitespace%%remote_location.county_code:word%%-:whitespace%%remote_location.county_region:word%%-whitespace%%remote_location.city:word%%-:whitespace%%remote_location.latitude:word%%-:whitespace%%remote_location.longitude:word%
+# ssh.log without geoip
+rule=%version:number%%-:whitespace%%auth_success:regex:/\b[T|F|-]\b/%%-:whitespace%%direction:regex:/INBOUND|OUTBOUND/%%-:whitespace%%client:word%%-:whitespace%%server:word%%-:whitespace%%cipher_alg:word%%-:whitespace%%mac_alg:word%%-:whitespace%%compression_alg:word%%-:whitespace%%hex_alg:word%%-:whitespace%%host_key_alg:word%%-:whitespace%%host_key:word%
+# rdp.log (need to redo this)
+rule=%cookie:word%%-:whitespace%%result:word%%-:whitespace%%security_protocol:word%%-:whitespace%%client:word%%-:whitespace%%server:word%%-:whitespace%%cipher_alg:word%%-:whitespace%%mac_alg:word%%-:whitespace%%compression_alg:word%%-:whitespace%%hex_alg:word%%-:whitespace%%host_key_alg:word%%-:whitespace%%host_key:word%
 
 prefix=
 
-# This is a "custom" bro output Sagan uses for file hashes from Bro.
-
-rule=: files: %-:word% %-:word% %src-ip:ipv4% %dst-ip:ipv4% %-:word% %-:word% %-:number% %-:word% %mime-type:word% %-:word% %-:word% %-:word% %-:word% %-:number% %-:number% %-:number% %-:number% %-:word% %-:word% %filehash-md5:word% %filehash-sha1:word% %filehash-sha256:word% %-:rest%
+# capture_loss.log
+rule=%ts:kernel-timestamp%%-:whitespace%%ts_delta:kernel-timestamp%%-:whitespace%%peer:word%%-:whitespace%%gaps:number%%-:whitespace%%acks:number%%-:whitespace%%percent_lost:float%
+# files.log
+rule=%ts:kernel-timestamp%%-:whitespace%%fuid:word%%-:whitespace%%tx_hosts:ipv4%%-:whitespace%%rx_hosts:ipv4%%-:whitespace%%conn_uids:word%%-:whitespace%%source:regex:/\b[A-Z]+\b/%%-:whitespace%%depth:number%%-:whitespace%%analyzers:word%%-:whitespace%%filename:word%%-:whitespace%%duration:float%%-:whitespace%%local_orig:regex:/\b[T|F]\b/%%-:whitespace%%is_orig:/\b[T|F]\b/%%-:whitespace%%seen_bytes:number%%-:whitespace%%total_bytes:number%%-:whitespace%%missiong_bytes:number%%-:whitespace%%overflow_bytes:number%%-:whitespace%%timedout:regex:/\b[T|F]\b/%%-:whitespace%%parent_fuid:word%%-:whitespace%%md5:word%%-:whitespace%%sha1:word%%-:whitespace%%sha245:word%%-:whitespace%%extracted:word%
